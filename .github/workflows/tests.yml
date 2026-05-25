@@ -2,47 +2,36 @@ name: OCI ARM Instance Creator
 
 on:
   schedule:
-      - cron: '*/5 * * * *'
-        workflow_dispatch:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
-        jobs:
-          run-script:
-              runs-on: ubuntu-latest
-                  name: Run script
-                      steps:
-                            - uses: actions/checkout@v1
-                                  - name: Install PHP
-                                          uses: shivammathur/setup-php@v2
-                                                  with:
-                                                            php-version: '8.3'
-                                                                  - name: Validate composer.json and composer.lock
-                                                                          run: composer validate
-                                                                                - name: Get Composer Cache Directory
-                                                                                        id: composer-cache
-                                                                                                run: echo "::set-output name=dir::$(composer config cache-files-dir)"
-                                                                                                      - uses: actions/cache@v1
-                                                                                                              with:
-                                                                                                                        path: ${{ steps.composer-cache.outputs.dir }}
-                                                                                                                                  key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-                                                                                                                                            restore-keys: |
-                                                                                                                                                        ${{ runner.os }}-composer-
-                                                                                                                                                              - name: Install dependencies
-                                                                                                                                                                      run: composer install --prefer-dist --no-progress
-                                                                                                                                                                            - name: Run script
-                                                                                                                                                                                    run: php index.php
-                                                                                                                                                                                            env:
-                                                                                                                                                                                                      OCI_REGION: ${{ secrets.OCI_REGION }}
-                                                                                                                                                                                                                OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
-                                                                                                                                                                                                                          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-                                                                                                                                                                                                                                    OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-                                                                                                                                                                                                                                              OCI_PRIVATE_KEY_FILENAME: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
-                                                                                                                                                                                                                                                        OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-                                                                                                                                                                                                                                                                  OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
-                                                                                                                                                                                                                                                                            OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-                                                                                                                                                                                                                                                                                      OCI_SHAPE: VM.Standard.A1.Flex
-                                                                                                                                                                                                                                                                                                OCI_OCPUS: 4
-                                                                                                                                                                                                                                                                                                          OCI_MEMORY_IN_GBS: 24
-                                                                                                                                                                                                                                                                                                                    OCI_AVAILABILITY_DOMAIN: miZM:EU-MADRID-1-AD-1
-                                                                                                                                                                                                                                                                                                                              OCI_DISPLAY_NAME: servidor-freetier
-                                                                                                                                                                                                                                                                                                                                        OCI_MAX_INSTANCES: 1
-                                                                                                                                                                                                                                                                                                                                                  OCI_BOOT_VOLUME_SIZE_IN_GBS: 50
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    name: Run script
+    steps:
+      - uses: actions/checkout@v1
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+      - name: Run script
+        run: php index.php
+        env:
+          OCI_REGION: ${{ secrets.OCI_REGION }}
+          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
+          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
+          OCI_PRIVATE_KEY_FILENAME: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
+          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
+          OCI_SHAPE: VM.Standard.A1.Flex
+          OCI_OCPUS: 4
+          OCI_MEMORY_IN_GBS: 24
+          OCI_AVAILABILITY_DOMAIN: miZM:EU-MADRID-1-AD-1
+          OCI_DISPLAY_NAME: servidor-freetier
+          OCI_MAX_INSTANCES: 1
+          OCI_BOOT_VOLUME_SIZE_IN_GBS: 50
