@@ -21,6 +21,15 @@ jobs:
         run: |
           echo "${{ secrets.OCI_PRIVATE_KEY_FILENAME }}" > /tmp/oci_api_key.pem
           chmod 600 /tmp/oci_api_key.pem
+      - name: Get Ubuntu 22.04 ARM image OCID
+        id: get_image
+        run: |
+          pip install oci-cli --quiet
+          mkdir -p ~/.oci
+          printf '[DEFAULT]\nuser=${{ secrets.OCI_USER_ID }}\nfingerprint=${{ secrets.OCI_KEY_FINGERPRINT }}\nkey_file=/tmp/oci_api_key.pem\ntenancy=${{ secrets.OCI_TENANCY_ID }}\nregion=${{ secrets.OCI_REGION }}\n' > ~/.oci/config
+          IMAGE_ID=$(oci compute image list --compartment-id "${{ secrets.OCI_TENANCY_ID }}" --operating-system "Canonical Ubuntu" --operating-system-version "22.04" --shape "VM.Standard.A1.Flex" --sort-by TIMECREATED --sort-order DESC --limit 1 --query 'data[0].id' --raw-output 2>/dev/null)
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_OUTPUT
+          echo "Found ARM Ubuntu 22.04 image: $IMAGE_ID"
       - name: Run script
         run: php index.php
         env:
@@ -30,7 +39,7 @@ jobs:
           OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
           OCI_PRIVATE_KEY_FILENAME: /tmp/oci_api_key.pem
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
+          OCI_IMAGE_ID: ${{ steps.get_image.outputs.IMAGE_ID }}
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
           OCI_SHAPE: VM.Standard.A1.Flex
           OCI_OCPUS: 4
